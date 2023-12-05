@@ -47,7 +47,7 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
     if (!isInit) {
       Preferences.saveData("init", true);
       NotificationService().scheduleNotification(
-          title: 'Tap ∞',
+          title: '10,000,000 Clicks',
           body: "🌟 Time to Unwind! 🎮",
           scheduledNotificationDateTime:
               DateTime.now().add(Duration(seconds: 10)));
@@ -72,11 +72,11 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.85,
                   child: AutoSizeText(
-                    "Tap ∞",
+                    "10,000,000 Clicks",
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     style: GoogleFonts.rubikBubbles(
-                        color: Colors.white, fontSize: 80),
+                        color: Colors.white, fontSize: 30),
                   ),
                 ),
                 const SizedBox(

@@ -7,7 +7,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Tap Infinity-∞</string>
+		<string>10,000,000 Clicks</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -41,10 +41,6 @@
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
-		<key>UIBackgroundModes</key>
-		<array>
-			<string>audio</string>
-		</array>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>MyApp uses the microphone to record your speech and convert it to text.</string>
 		<key>NSAppTransportSecurity</key>
