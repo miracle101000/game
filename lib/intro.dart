@@ -21,7 +21,7 @@ class Intro extends StatefulWidget {
   State<Intro> createState() => _IntroState();
 }
 
-class _IntroState extends State<Intro> with TickerProviderStateMixin {
+class _IntroState extends State<Intro> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   AssetsAudioPlayer audioPlayer = AssetsAudioPlayer();
   InterstitialAd? _interstitialAd;
   int _numInterstitialLoadAttempts = 0;
@@ -47,15 +47,15 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
     if (!isInit) {
       Preferences.saveData("init", true);
       NotificationService().scheduleNotification(
-          title: '10,000,000 Clicks',
-          body: "🌟 Time to Unwind! 🎮",
-          scheduledNotificationDateTime:
-              DateTime.now().add(Duration(seconds: 10)));
+        title: '10,000,000 Clicks',
+        body: "🌟 Time to Unwind! 🎮",
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
@@ -164,9 +164,7 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
             _interstitialAd = ad;
             _numInterstitialLoadAttempts = 0;
             _interstitialAd!.setImmersiveMode(true);
-            Future.delayed(Duration(seconds: 2)).then((value) async {
-              await _showInterstitialAd();
-            });
+            _showInterstitialAd();
           },
           onAdFailedToLoad: (LoadAdError error) {
             print('InterstitialAd failed to load: $error.');
@@ -177,6 +175,9 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
             }
           },
         ));
+    Future.delayed(Duration(seconds: 2)).then((value) async {
+      await _showInterstitialAd();
+    });
   }
 
   Future _showInterstitialAd() async {
@@ -190,7 +191,7 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
       onAdDismissedFullScreenContent: (InterstitialAd ad) {
         print('$ad onAdDismissedFullScreenContent.');
         ad.dispose();
-        _createInterstitialAd();
+        // _createInterstitialAd();
       },
       onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
         print('$ad onAdFailedToShowFullScreenContent: $error');
@@ -201,4 +202,7 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
     _interstitialAd!.show();
     _interstitialAd = null;
   }
+  
+  @override
+  bool get wantKeepAlive => true;
 }

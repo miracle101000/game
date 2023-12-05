@@ -1,5 +1,8 @@
+import 'dart:core';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
+
 class NotificationService {
   final FlutterLocalNotificationsPlugin notificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -10,7 +13,7 @@ class NotificationService {
 
     var initializationSettingsIOS = DarwinInitializationSettings(
         requestAlertPermission: true,
-        requestBadgePermission: true,
+        requestBadgePermission: false,
         requestSoundPermission: true,
         onDidReceiveLocalNotification:
             (int id, String? title, String? body, String? payload) async {});
@@ -40,17 +43,20 @@ class NotificationService {
       String? title,
       String? body,
       String? payLoad,
-      required DateTime scheduledNotificationDateTime}) async {
+     }) async {
     return notificationsPlugin.zonedSchedule(
         id,
         title,
         body,
-        tz.TZDateTime.from(
-          scheduledNotificationDateTime,
-          tz.local,
+        tz.TZDateTime.now(tz.local).add(
+          Duration(
+            days: 1,
+            hours: 13, 
+          ),
         ),
         await notificationDetails(),
         androidAllowWhileIdle: true,
+        matchDateTimeComponents: DateTimeComponents.time,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime);
   }

@@ -1,13 +1,16 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:animated_background/animated_background.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game/preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:intl/intl.dart';
 import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
+import 'package:wakelock/wakelock.dart';
 
 class Body extends StatefulWidget {
   final PageController pageController;
@@ -17,7 +20,7 @@ class Body extends StatefulWidget {
   State<Body> createState() => _BodyState();
 }
 
-class _BodyState extends State<Body> {
+class _BodyState extends State<Body> with TickerProviderStateMixin{
   int count = 0;
   Color color = Colors.orangeAccent.shade700;
   AssetsAudioPlayer audioPlayer = AssetsAudioPlayer();
@@ -37,6 +40,7 @@ class _BodyState extends State<Body> {
   @override
   void dispose() {
     super.dispose();
+    Wakelock.disable();
     _rewardedInterstitialAd?.dispose();
     audioPlayer.dispose();
   }
@@ -44,6 +48,7 @@ class _BodyState extends State<Body> {
   init() async {
     count = await Preferences.getData("count") ?? 0;
     setState(() {});
+    Wakelock.enable();
   }
 
   @override
@@ -61,81 +66,79 @@ class _BodyState extends State<Body> {
           color: Colors.white,
         ),
       ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.black, color])),
-        child: Center(
-          child: Column(
-            children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.02,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    count.toString(),
-                    style: GoogleFonts.rubikBubbles(
-                        color: Colors.white, fontSize: 30),
-                  )
-                ],
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.7,
-                width: 20,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 100),
-                  child: LiquidLinearProgressIndicator(
-                    value: count / 10000000,
-                    valueColor: const AlwaysStoppedAnimation(Colors.orange),
-                    backgroundColor: Colors.black38,
-                    borderColor: Colors.transparent,
-                    borderWidth: 0.0,
-                    borderRadius: 12.0,
-                    direction: Axis.vertical,
+      backgroundColor: Colors.black ,
+      body: AnimatedBackground(
+        vsync: this,
+        behaviour:
+            RandomParticleBehaviour(options: ParticleOptions(baseColor: color)),
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Center(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.07,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                    format(count),
+                      style: GoogleFonts.rubikBubbles(
+                          color: Colors.white, fontSize: 30),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  width: 20,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 100),
+                    child: LiquidLinearProgressIndicator(
+                      value: count / 10000000,
+                      valueColor:  AlwaysStoppedAnimation(color),
+                      backgroundColor: Colors.transparent,
+                      borderColor: Colors.transparent,
+                      borderWidth: 0.0,
+                      borderRadius: 12.0,
+                      direction: Axis.vertical,
+                    ),
                   ),
                 ),
-              ),
-              TextButton(
-                onPressed: () async {
-                  if (Platform.isAndroid) {
-                    audioPlayer.setPitch(generateRandomNumber().toDouble());
-                  }
-                  if (count < 10000000) {
-                    await Future.wait([
-                      Future(() {
-                        count++;
-                        color = getRandomColor();
-                        setState(() {});
-                      }),
-                      Future(() async {
-                        await HapticFeedback.heavyImpact();
-                      }),
-                      Future(() {
-                        audioPlayer.play();
-                      }),
-                    ]);
-                    Preferences.saveData("count", count);
-                    if (count % 50 == 0) {
-                      _showRewardedInterstitialAd();
+                TextButton(
+                  onPressed: () async {
+                    if (count < 10000000) {
+                      await Future.wait([
+                        Future(() {
+                          count++;
+                          color = getRandomColor();
+                          setState(() {});
+                        }),
+                        Future(() async {
+                          await HapticFeedback.heavyImpact();
+                        }),
+                        Future(() {
+                          audioPlayer.play();
+                        }),
+                      ]);
+                      Preferences.saveData("count", count);
+                      if (count % 50 == 0) {
+                        _showRewardedInterstitialAd();
+                      }
+                    } else {
+                      Preferences.saveData("count", 0);
+                      show();
                     }
-                  } else {
-                    Preferences.saveData("count", 0);
-                    show();
-                  }
-                },
-                child: Text(
-                  "Tap",
-                  style: GoogleFonts.rubikBubbles(
-                      color: Colors.white, fontSize: 30),
-                ),
-              )
-            ],
+                  },
+                  child: Text(
+                    "Tap",
+                    style: GoogleFonts.rubikBubbles(
+                        color: Colors.white, fontSize: 30),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -154,6 +157,10 @@ class _BodyState extends State<Body> {
   int generateRandomNumber() {
     Random random = Random();
     return random.nextInt(17); // Generates a random number between 0 and 16
+  }
+
+  String format(int value){
+    return  NumberFormat('#,###').format(value);
   }
 
   show() {
@@ -252,4 +259,6 @@ class _BodyState extends State<Body> {
     });
     _rewardedInterstitialAd = null;
   }
+  
+
 }

@@ -27,10 +27,10 @@ class _GameState extends State<Game> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        toolbarHeight: 0,
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.black,
+      //   toolbarHeight: 0,
+      // ),
       backgroundColor: Colors.black,
       body: PageView(
         controller: controller,
