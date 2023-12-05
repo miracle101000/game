@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:animated_background/animated_background.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -50,7 +49,8 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
       NotificationService().scheduleNotification(
           title: 'Tap ∞',
           body: "🌟 Time to Unwind! 🎮",
-          scheduledNotificationDateTime: DateTime.now());
+          scheduledNotificationDateTime:
+              DateTime.now().add(Duration(seconds: 10)));
     }
   }
 
@@ -157,17 +157,16 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
         adUnitId: Platform.isAndroid
             ? 'ca-app-pub-9080800851774966/4162880362'
             : 'ca-app-pub-9080800851774966/7564699633',
-        request: const AdRequest(
-            // keywords: <String>['game', 'videogame'],
-            // // contentUrl: 'http://foo.com/bar.html',
-            // nonPersonalizedAds: false,
-            ),
+        request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (InterstitialAd ad) {
             print('$ad loaded');
             _interstitialAd = ad;
             _numInterstitialLoadAttempts = 0;
             _interstitialAd!.setImmersiveMode(true);
+            Future.delayed(Duration(seconds: 2)).then((value) async {
+              await _showInterstitialAd();
+            });
           },
           onAdFailedToLoad: (LoadAdError error) {
             print('InterstitialAd failed to load: $error.');
@@ -178,10 +177,9 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin {
             }
           },
         ));
-    _showInterstitialAd();
   }
 
-  void _showInterstitialAd() {
+  Future _showInterstitialAd() async {
     if (_interstitialAd == null) {
       print('Warning: attempt to show interstitial before loaded.');
       return;

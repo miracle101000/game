@@ -205,11 +205,7 @@ class _BodyState extends State<Body> {
         adUnitId: Platform.isAndroid
             ? 'ca-app-pub-9080800851774966/1093863893'
             : 'ca-app-pub-9080800851774966/7000796699',
-        request: const AdRequest(
-          keywords: <String>['game', 'videogame'],
-          // contentUrl: 'http://foo.com/bar.html',
-          nonPersonalizedAds: false,
-        ),
+        request: const AdRequest(),
         rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
           onAdLoaded: (RewardedInterstitialAd ad) {
             print('$ad loaded.');
