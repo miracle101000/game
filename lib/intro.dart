@@ -21,7 +21,8 @@ class Intro extends StatefulWidget {
   State<Intro> createState() => _IntroState();
 }
 
-class _IntroState extends State<Intro> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+class _IntroState extends State<Intro>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   AssetsAudioPlayer audioPlayer = AssetsAudioPlayer();
   InterstitialAd? _interstitialAd;
   int _numInterstitialLoadAttempts = 0;
@@ -32,7 +33,7 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin, AutomaticK
     init();
     audioPlayer.open(Audio("assets/sound/play.wav"),
         autoStart: false, showNotification: false);
-    _createInterstitialAd();
+    if (Platform.isIOS) _createInterstitialAd();
   }
 
   @override
@@ -202,7 +203,7 @@ class _IntroState extends State<Intro> with TickerProviderStateMixin, AutomaticK
     _interstitialAd!.show();
     _interstitialAd = null;
   }
-  
+
   @override
   bool get wantKeepAlive => true;
 }

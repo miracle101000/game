@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:animated_background/animated_background.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game/preferences.dart';
@@ -20,13 +22,14 @@ class Body extends StatefulWidget {
   State<Body> createState() => _BodyState();
 }
 
-class _BodyState extends State<Body> with TickerProviderStateMixin{
+class _BodyState extends State<Body> with TickerProviderStateMixin {
   int count = 0;
   Color color = Colors.orangeAccent.shade700;
   AssetsAudioPlayer audioPlayer = AssetsAudioPlayer();
   RewardedInterstitialAd? _rewardedInterstitialAd;
   int _numRewardedInterstitialLoadAttempts = 0;
   int maxFailedLoadAttempts = 3;
+  int mulitplier = 1;
 
   @override
   void initState() {
@@ -47,6 +50,7 @@ class _BodyState extends State<Body> with TickerProviderStateMixin{
 
   init() async {
     count = await Preferences.getData("count") ?? 0;
+    mulitplier = await Preferences.getData("mulitplier") ?? 1;
     setState(() {});
     Wakelock.enable();
   }
@@ -54,19 +58,48 @@ class _BodyState extends State<Body> with TickerProviderStateMixin{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepOrange.shade900,
-        onPressed: () {
-          widget.pageController.animateToPage(0,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeInOut);
-        },
-        child: const Icon(
-          Icons.close,
-          color: Colors.white,
-        ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              _showRewardedInterstitialAd();
+            },
+            child: Container(
+              width: 70,
+              padding: EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                  color: Colors.deepOrange.shade900,
+                  borderRadius: BorderRadius.circular(5)),
+              child: AutoSizeText(
+                "Watch Ad x${mulitplier + 1}",
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                style:
+                    GoogleFonts.rubikBubbles(color: Colors.white, fontSize: 14),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          FloatingActionButton(
+            backgroundColor: Colors.deepOrange.shade900,
+            onPressed: () {
+              widget.pageController.animateToPage(0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut);
+            },
+            child: const Icon(
+              Icons.close,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
-      backgroundColor: Colors.black ,
+      backgroundColor: Colors.black,
       body: AnimatedBackground(
         vsync: this,
         behaviour:
@@ -84,7 +117,7 @@ class _BodyState extends State<Body> with TickerProviderStateMixin{
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                    format(count),
+                      format(count),
                       style: GoogleFonts.rubikBubbles(
                           color: Colors.white, fontSize: 30),
                     )
@@ -97,7 +130,7 @@ class _BodyState extends State<Body> with TickerProviderStateMixin{
                     padding: const EdgeInsets.symmetric(vertical: 100),
                     child: LiquidLinearProgressIndicator(
                       value: count / 10000000,
-                      valueColor:  AlwaysStoppedAnimation(color),
+                      valueColor: AlwaysStoppedAnimation(color),
                       backgroundColor: Colors.transparent,
                       borderColor: Colors.transparent,
                       borderWidth: 0.0,
@@ -111,7 +144,7 @@ class _BodyState extends State<Body> with TickerProviderStateMixin{
                     if (count < 10000000) {
                       await Future.wait([
                         Future(() {
-                          count++;
+                          count += mulitplier;
                           color = getRandomColor();
                           setState(() {});
                         }),
@@ -123,7 +156,7 @@ class _BodyState extends State<Body> with TickerProviderStateMixin{
                         }),
                       ]);
                       Preferences.saveData("count", count);
-                      if (count % 50 == 0) {
+                      if (Platform.isIOS && count % 50 == 0) {
                         _showRewardedInterstitialAd();
                       }
                     } else {
@@ -159,8 +192,8 @@ class _BodyState extends State<Body> with TickerProviderStateMixin{
     return random.nextInt(17); // Generates a random number between 0 and 16
   }
 
-  String format(int value){
-    return  NumberFormat('#,###').format(value);
+  String format(int value) {
+    return NumberFormat('#,###').format(value);
   }
 
   show() {
@@ -256,9 +289,14 @@ class _BodyState extends State<Body> with TickerProviderStateMixin{
     _rewardedInterstitialAd!.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
       print('$ad with reward $RewardItem(${reward.amount}, ${reward.type})');
+      _updateMultiplier();
     });
     _rewardedInterstitialAd = null;
   }
-  
 
+  _updateMultiplier() {
+    mulitplier++;
+    setState(() {});
+    Preferences.saveData("mulitplier", mulitplier);
+  }
 }
